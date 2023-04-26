@@ -71,6 +71,9 @@ system.cpu = cpu_list
 for cpu in system.cpu:
     cpu.createInterruptController()
 
+# create bus that connects cpe to mpe
+# system.membus = SystemXBar()
+
 
 Ruby.create_system(args, False, system, cpus=cpu_list)
 
@@ -83,9 +86,6 @@ system.ruby.clk_domain = SrcClockDomain(
 assert len(cpu_list) == len(system.ruby._cpu_ports)
 
 for (i, cpu) in enumerate(cpu_list):
-    #
-    # 
-    # cpu.dcache_port = system.ruby._cpu_ports[i].in_ports
     system.ruby._cpu_ports[i].connectCpuPorts(cpu)
 
 # -----------------------

@@ -50,7 +50,7 @@ class Sunway(SimpleTopology):
     def makeTopology(self, options, network, IntLink, ExtLink, Router):
         nodes = self.nodes
 
-        num_routers = options.num_cpus
+        num_routers = options.num_cpus + 1
         num_rows = options.mesh_rows
 
         # default values for link latency and router latency.
@@ -58,11 +58,11 @@ class Sunway(SimpleTopology):
         link_latency = options.link_latency  # used by simple and garnet
         router_latency = options.router_latency  # only used by garnet
 
-        # There must be an evenly divisible number of cntrls to routers
-        # Also, obviously the number or rows must be <= the number of routers
-        cntrls_per_router, remainder = divmod(len(nodes), num_routers)
-        assert num_rows > 0 and num_rows <= num_routers
-        num_columns = int(num_routers / num_rows)
+        # # There must be an evenly divisible number of cntrls to routers
+        # # Also, obviously the number or rows must be <= the number of routers
+        # cntrls_per_router, remainder = divmod(len(nodes), num_routers-1)
+        assert num_rows > 0 and num_rows <= num_routers-1
+        num_columns = int((num_routers-1) / num_rows)
         # assert num_columns * num_rows == num_routers-1
         print("columns: " + str(num_columns))
 
@@ -98,16 +98,15 @@ class Sunway(SimpleTopology):
         int_links = []
         ext_links = []
 
-
+        #connect l1 cache to all routers
         for (i, n) in enumerate(network_nodes):
-            print(n.type)
-            cntrl_level, router_id = divmod(i, num_routers)
-            assert cntrl_level < cntrls_per_router
+            print(n.type + str(link_count))
             ext_links.append(
                 ExtLink(
                     link_id=link_count,
                     ext_node=n,
-                    int_node=routers[router_id],
+                    # int_node=routers[int(str(divmod(i, options.num_cpus-1)))],
+                    int_node=routers[int(i % (options.num_cpus))],
                     latency=link_latency,
                 )
             )
@@ -115,22 +114,14 @@ class Sunway(SimpleTopology):
 
         # Connect the remainding nodes to router 0.  These should only be
         # DMA or DIR nodes.
-        print("sadge remaining stuff" + str(len(remainder_nodes)))
         for (i, node) in enumerate(remainder_nodes):
             assert node.type == "DMA_Controller" or node.type == "L2Cache_Controller"
-            assert i < remainder
-            # if (node.type == "L2Cache_Controller"):
-            #     int_links.append(
-            #         IntLink(
-            #             link_id=link_count,
-            #             src_node=routers[]
-            #         )
-            #     )
+            print("sadge remainder stuff: " + node.type)
             ext_links.append(
                 ExtLink(
                     link_id=link_count,
                     ext_node=node,
-                    int_node=routers[num_routers - 1],
+                    int_node=routers[num_routers - 2],
                     latency=link_latency,
                 )
             )
@@ -138,6 +129,12 @@ class Sunway(SimpleTopology):
             
 
         network.ext_links = ext_links
+
+
+
+
+
+        # MAKE THE INTERNAL CONNECTIONS HERE (MESH LINKS)
 
 
         # East output to West input links (weight = 1)
@@ -216,17 +213,69 @@ class Sunway(SimpleTopology):
                     )
                     link_count += 1
 
-        int_links.append(
-            IntLink(
-                link_id=link_count,
-                            src_node=routers[len(routers) - 1],
-                            dst_node=routers[0],
-                            src_outport="South",
-                            dst_inport="North",
-                            latency=link_latency,
-                            weight=1,
+
+        #connect the mesh to big bus router
+        for i in range(num_columns + 1):
+            if i == 0:
+                continue
+            id = len(routers) - i - 2
+            busRouter = len(routers) - 1
+            int_links.append(
+                IntLink(
+                    link_id=link_count,
+                    src_node=routers[id],
+                    dst_node=routers[busRouter],
+                    src_outport="toBus",
+                    dst_inport="forBus" + str(link_count),
+                    latency=link_latency,
+                    weight=1,
+                )
             )
-        )
+            int_links.append(
+                IntLink(
+                    link_id=link_count,
+                    src_node=routers[busRouter],
+                    dst_node=routers[id],
+                    src_outport="fromBus" + str(link_count),
+                    dst_inport="byBus",
+                    latency=link_latency,
+                    weight=1,
+                )
+            )
+
+        # int_links.append(
+        #     IntLink(
+        #         link_id=link_count,
+        #                     src_node=routers[len(routers) - 2],
+        #                     dst_node=routers[len(routers) - 1],
+        #                     src_outport="bus",
+        #                     dst_inport="mpe",
+        #                     latency=link_latency,
+        #                     weight=1,
+        #     )
+        # )
+        # int_links.append(
+        #     IntLink(
+        #         link_id=link_count+1,
+        #                     src_node=routers[len(routers) - 3],
+        #                     dst_node=routers[len(routers) - 1],
+        #                     src_outport="bus",
+        #                     dst_inport="mesh1",
+        #                     latency=link_latency,
+        #                     weight=1,
+        #     )
+        # )
+        # int_links.append(
+        #     IntLink(
+        #         link_id=link_count+2,
+        #                     src_node=routers[len(routers) - 4],
+        #                     dst_node=routers[len(routers) - 1],
+        #                     src_outport="bus",
+        #                     dst_inport="mesh2",
+        #                     latency=link_latency,
+        #                     weight=1,
+        #     )
+        # )
 
         network.int_links = int_links
 

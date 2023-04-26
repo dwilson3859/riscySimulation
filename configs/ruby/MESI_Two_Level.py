@@ -71,10 +71,8 @@ def create_system(
     #
     l2_bits = int(math.log(options.num_l2caches, 2))
     block_size_bits = int(math.log(options.cacheline_size, 2))
-    print("i do be here")
 
     for i in range(options.num_cpus):
-        print("it do run")
         #
         # First create the Ruby objects associated with this cpu
         #
