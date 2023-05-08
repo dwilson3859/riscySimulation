@@ -71,8 +71,6 @@ system.cpu = cpu_list
 for cpu in system.cpu:
     cpu.createInterruptController()
 
-# create bus that connects cpe to mpe
-# system.membus = SystemXBar()
 
 
 Ruby.create_system(args, False, system, cpus=cpu_list)

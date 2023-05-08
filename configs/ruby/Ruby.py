@@ -155,6 +155,7 @@ def setup_memory_controllers(system, ruby, dir_cntrls, options):
     print("mem Dir Controllers: " + str(len(dir_cntrls)))
     for dir_cntrl in dir_cntrls:
         crossbar = None
+        print("system mem ranges: " + str(system.mem_ranges))
         if len(system.mem_ranges) > 1:
             crossbar = IOXBar()
             crossbars.append(crossbar)
@@ -172,7 +173,6 @@ def setup_memory_controllers(system, ruby, dir_cntrls, options):
                 options.xor_low_bit,
             )
             if issubclass(mem_type, DRAMInterface):
-                print("wow we do have some dram all up in there")
                 mem_ctrl = m5.objects.MemCtrl(dram=dram_intf)
             else:
                 mem_ctrl = dram_intf
@@ -198,7 +198,6 @@ def setup_memory_controllers(system, ruby, dir_cntrls, options):
         dir_cntrl.addr_ranges = dir_ranges
 
     system.mem_ctrls = mem_ctrls
-    print("all da mem controllers: " + str(len(mem_ctrls)))
 
     if len(crossbars) > 0:
         ruby.crossbars = crossbars

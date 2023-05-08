@@ -86,8 +86,6 @@ def create_system(
                 start_index_bit=block_size_bits,
             )
 
-        print("successfully did it")
-
         clk_domain = cpus[i].clk_domain
 
         # Only one unified L1 cache exists. Can cache instructions and data.

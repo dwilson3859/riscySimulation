@@ -1,0 +1,4 @@
+USE_RISCV_ISA = True
+PROTOCOL='MI_example'
+NUMBER_BITS_PER_SET = '2048'
+
