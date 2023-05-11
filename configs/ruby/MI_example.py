@@ -75,11 +75,11 @@ def create_system(
         cache = None
         if i == options.num_cpus - 1:
             cache = L1Cache(
-                size= "64kB",
+                size="64kB",
                 assoc=options.l1d_assoc,
                 start_index_bit=block_size_bits,
             )
-        else: 
+        else:
             cache = L1Cache(
                 size=options.l1d_size,
                 assoc=options.l1d_assoc,

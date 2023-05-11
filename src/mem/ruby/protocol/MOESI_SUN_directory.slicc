@@ -1,0 +1,8 @@
+protocol "MOESI_SUN_directory";
+include "RubySlicc_interfaces.slicc";
+include "MOESI_SUN_directory-msg.sm";
+include "MOESI_SUN_directory-L1CPEcache.sm";
+include "MOESI_SUN_directory-L1MPEcache.sm";
+include "MOESI_SUN_directory-L2cache.sm";
+include "MOESI_SUN_directory-dma.sm";
+include "MOESI_SUN_directory-dir.sm";

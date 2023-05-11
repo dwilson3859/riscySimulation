@@ -38,6 +38,7 @@ main.Append(ALL_PROTOCOLS=[
     'MESI_Three_Level_HTM',
     'MI_example',
     'MOESI_CMP_directory',
+    'MOESI_SUN_directory',
     'MOESI_CMP_token',
     'MOESI_hammer',
     'Garnet_standalone',

@@ -10,20 +10,20 @@ Scratchpad::Scratchpad(ScratchpadParams *params) :
     SimObject(params),
 	event([this]{processEvent();}, name()),
 	myName(params.name),
-	latency(params.time_to_wait), 
-	timesLeft(params.number_of_fires)
+	latency(params.time_to_wait),
+	size(params.size)
 {
     DPRINTF(Scratchpad, "Created the scratchpad\n");
 }
 
 void
-Scratchpad::startup() 
+Scratchpad::startup()
 {
 	schedule(event, latency)
 }
 
 void
-Scratchpad::processEvent() 
+Scratchpad::processEvent()
 {
 	timesLeft--;
 	DPRINTF(Scratchpad, "Processing Scratch event :)  %d left\n", timesLeft);

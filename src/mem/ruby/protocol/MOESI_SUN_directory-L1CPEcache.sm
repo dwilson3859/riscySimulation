@@ -38,7 +38,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-machine(MachineType:L1Cache, "L1 cache protocol")
+machine(MachineType:Steve, "L1 CPE cache protocol")
  : Sequencer * sequencer;
    CacheMemory * L1Icache;
    CacheMemory * L1Dcache;
@@ -473,7 +473,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
         out_msg.Requestor := machineID;
         out_msg.RequestorMachine := MachineType:L1Cache;
         out_msg.Destination.add(mapAddressToMachine(address,
-                                                    MachineType:L2Cache));
+                                                    MachineType:Directory));
         out_msg.MessageSize := MessageSizeType:Request_Control;
         out_msg.AccessMode := in_msg.AccessMode;
         out_msg.Prefetch := in_msg.Prefetch;
@@ -489,7 +489,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
         out_msg.Requestor := machineID;
         out_msg.RequestorMachine := MachineType:L1Cache;
         out_msg.Destination.add(mapAddressToMachine(address,
-                                                    MachineType:L2Cache));
+                                                    MachineType:Directory));
         out_msg.MessageSize := MessageSizeType:Request_Control;
         out_msg.AccessMode := in_msg.AccessMode;
         out_msg.Prefetch := in_msg.Prefetch;
@@ -504,7 +504,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
       out_msg.Requestor := machineID;
       out_msg.RequestorMachine := MachineType:L1Cache;
       out_msg.Destination.add(mapAddressToMachine(address,
-                                                  MachineType:L2Cache));
+                                                  MachineType:Directory));
       out_msg.MessageSize := MessageSizeType:Writeback_Control;
     }
   }
@@ -516,7 +516,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
       out_msg.Requestor := machineID;
       out_msg.RequestorMachine := MachineType:L1Cache;
       out_msg.Destination.add(mapAddressToMachine(address,
-                                                  MachineType:L2Cache));
+                                                  MachineType:Directory));
       out_msg.MessageSize := MessageSizeType:Writeback_Control;
     }
   }
@@ -528,7 +528,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
       out_msg.Requestor := machineID;
       out_msg.RequestorMachine := MachineType:L1Cache;
       out_msg.Destination.add(mapAddressToMachine(address,
-                                                  MachineType:L2Cache));
+                                                  MachineType:Directory));
       out_msg.MessageSize := MessageSizeType:Writeback_Control;
     }
   }
@@ -536,14 +536,14 @@ machine(MachineType:L1Cache, "L1 cache protocol")
   action(e_sendData, "e", desc="Send data from cache to requestor") {
     peek(requestNetwork_in, RequestMsg) {
       assert(is_valid(cache_entry));
-      if (in_msg.RequestorMachine == MachineType:L2Cache) {
+      if (in_msg.RequestorMachine == MachineType:Directory) {
         enqueue(responseNetwork_out, ResponseMsg, cacheResponseLatency()) {
           out_msg.addr := address;
           out_msg.Type := CoherenceResponseType:DATA;
           out_msg.Sender := machineID;
           out_msg.SenderMachine := MachineType:L1Cache;
           out_msg.Destination.add(mapAddressToMachine(address,
-                                                      MachineType:L2Cache));
+                                                      MachineType:Directory));
           out_msg.DataBlk := cache_entry.DataBlk;
           // out_msg.Dirty := cache_entry.Dirty;
           out_msg.Dirty := false;
@@ -573,14 +573,14 @@ machine(MachineType:L1Cache, "L1 cache protocol")
   action(ee_sendDataExclusive, "\e", desc="Send data from cache to requestor, don't keep a shared copy") {
     peek(requestNetwork_in, RequestMsg) {
       assert(is_valid(cache_entry));
-      if (in_msg.RequestorMachine == MachineType:L2Cache) {
+      if (in_msg.RequestorMachine == MachineType:Directory) {
         enqueue(responseNetwork_out, ResponseMsg, cacheResponseLatency()) {
           out_msg.addr := address;
           out_msg.Type := CoherenceResponseType:DATA_EXCLUSIVE;
           out_msg.Sender := machineID;
           out_msg.SenderMachine := MachineType:L1Cache;
           out_msg.Destination.add(mapAddressToMachine(address,
-                                                      MachineType:L2Cache));
+                                                      MachineType:Directory));
           out_msg.DataBlk := cache_entry.DataBlk;
           out_msg.Dirty := cache_entry.Dirty;
           out_msg.Acks := in_msg.Acks;
@@ -625,7 +625,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
           out_msg.Sender := machineID;
           out_msg.SenderMachine := MachineType:L1Cache;
           out_msg.Destination.add(mapAddressToMachine(address,
-                                                      MachineType:L2Cache));
+                                                      MachineType:Directory));
           out_msg.Acks := 0 - 1; // -1
           out_msg.MessageSize := MessageSizeType:Response_Control;
         }
@@ -640,7 +640,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
       out_msg.Sender := machineID;
       out_msg.SenderMachine := MachineType:L1Cache;
       out_msg.Destination.add(mapAddressToMachine(address,
-                                                  MachineType:L2Cache));
+                                                  MachineType:Directory));
       out_msg.MessageSize := MessageSizeType:Unblock_Control;
     }
   }
@@ -652,7 +652,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
       out_msg.Sender := machineID;
       out_msg.SenderMachine := MachineType:L1Cache;
       out_msg.Destination.add(mapAddressToMachine(address,
-                                                  MachineType:L2Cache));
+                                                  MachineType:Directory));
       out_msg.MessageSize := MessageSizeType:Unblock_Control;
     }
   }
@@ -763,7 +763,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
         out_msg.Sender := machineID;
         out_msg.SenderMachine := MachineType:L1Cache;
         out_msg.Destination.add(mapAddressToMachine(address,
-                                                    MachineType:L2Cache));
+                                                    MachineType:Directory));
         out_msg.Dirty := false;
         out_msg.Acks := 1;
         out_msg.MessageSize := MessageSizeType:Response_Control;
@@ -796,7 +796,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
           out_msg.Sender := machineID;
           out_msg.SenderMachine := MachineType:L1Cache;
           out_msg.Destination.add(mapAddressToMachine(address,
-                                                      MachineType:L2Cache));
+                                                      MachineType:Directory));
           out_msg.DataBlk := tbe.DataBlk;
           // out_msg.Dirty := tbe.Dirty;
           out_msg.Dirty := false;
@@ -830,7 +830,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
           out_msg.Sender := machineID;
           out_msg.SenderMachine := MachineType:L1Cache;
           out_msg.Destination.add(mapAddressToMachine(address,
-                                                      MachineType:L2Cache));
+                                                      MachineType:Directory));
           out_msg.DataBlk := tbe.DataBlk;
           out_msg.Dirty := tbe.Dirty;
           out_msg.Acks := in_msg.Acks;
@@ -848,7 +848,7 @@ machine(MachineType:L1Cache, "L1 cache protocol")
       out_msg.Requestor := machineID;
       out_msg.RequestorMachine := MachineType:L1Cache;
       out_msg.Destination.add(mapAddressToMachine(address,
-                                                  MachineType:L2Cache));
+                                                  MachineType:Directory));
       if (tbe.Dirty) {
         out_msg.Type := CoherenceRequestType:WRITEBACK_DIRTY_DATA;
       } else {

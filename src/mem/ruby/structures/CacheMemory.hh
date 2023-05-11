@@ -124,7 +124,7 @@ class CacheMemory : public SimObject
     bool isBlockNotBusy(int64_t cache_set, int64_t loc);
 
     // Hook for checkpointing the contents of the cache
-    void recordCContents(int cntrl, CacheRecorder* tr) const;
+    void recordCacheContents(int cntrl, CacheRecorder* tr) const;
 
     // Set this address to most recently used
     void setMRU(Addr address);

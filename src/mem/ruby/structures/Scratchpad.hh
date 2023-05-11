@@ -29,7 +29,6 @@ class Scratchpad : public SimObject
 {
   public:
     typedef ScratchpadParams Params;
-    typedef std::shared_ptr<replacement_policy::ReplacementData> ReplData;
     Scratchpad(const Params &p);
     ~Scratchpad();
 
@@ -46,18 +45,6 @@ class Scratchpad : public SimObject
 
     // tests to see if an address is present in the cache
     bool isTagPresent(Addr address) const;
-
-    // Returns true if there is:
-    //   a) a tag match on this address or there is
-    //   b) an unused line in the same cache "way"
-    bool cacheAvail(Addr address) const;
-
-    // Returns a NULL entry that acts as a placeholder for invalid lines
-    AbstractCacheEntry*
-    getNullEntry() const
-    {
-        return nullptr;
-    }
 
     // find an unused entry and sets the tag appropriate for the address
     AbstractCacheEntry* allocate(Addr address, AbstractCacheEntry* new_entry);

@@ -50,11 +50,13 @@ from m5.objects import *
 from m5.objects import L2Cache_Controller
 from m5.defines import buildEnv
 
+
 class MyCacheSystem(RubySystem):
     def __init__(self):
         if buildEnv["PROTOCOL"] != "MESI_Two_Level":
-            fatal("This script requires the MESI_Two_Level protocol to be built.")
-
+            fatal(
+                "This script requires the MESI_Two_Level protocol to be built."
+            )
 
         super(MyCacheSystem, self).__init__()
 
@@ -80,8 +82,6 @@ class MyCacheSystem(RubySystem):
         self.cacheline_size = 64
         self.l2_bits = int(math.log(self.num_l2caches, 2))
         self.block_size_bits = int(math.log(self.cacheline_size, 2))
-        
-
 
         self.controllers = [L1Cache(system, self, cpu) for cpu in cpus] + [
             DirController(self, system.mem_ranges, mem_ctrls)
@@ -174,6 +174,7 @@ class L1Cache(L1Cache_Controller):
         self.responseToCache = MessageBuffer(ordered=True)
         self.responseToCache.in_port = ruby_system.network.out_port
 
+
 class L1ICache(L1Cache):
     def __init__(self, system, ruby_system, cpu):
         super().__init__(system, ruby_system, cpu)
@@ -188,18 +189,22 @@ class L1ICache(L1Cache):
         self.ruby_system = ruby_system
         self.connectQueues(ruby_system)
 
+
 class L1DCache(L1Cache):
     def __init__(self, system, ruby_system, cpu):
         super().__init__(system, ruby_system, cpu)
         self.version = self.versionCount()
         # This is the cache memory object that stores the cache data and tags
         self.cacheMemory = RubyCache(
-            size="128kB", assoc=8, start_index_bit=self.getBlockSizeBits(system)
+            size="128kB",
+            assoc=8,
+            start_index_bit=self.getBlockSizeBits(system),
         )
         self.clk_domain = cpu.clk_domain
         self.send_evictions = self.sendEvicts(cpu)
         self.ruby_system = ruby_system
         self.connectQueues(ruby_system)
+
 
 class L2Cache(L2Cache_Controller):
 
@@ -306,7 +311,7 @@ class MyNetwork(SimpleNetwork):
         """Connect all of the controllers to routers and connec the routers
         together in a point-to-point network.
         """
-         # Create one router/switch per controller in the system
+        # Create one router/switch per controller in the system
         self.routers = [Switch(router_id=i) for i in range(len(controllers))]
 
         # Make a link from each controller to the router. The link goes
@@ -336,31 +341,26 @@ class MyNetwork(SimpleNetwork):
                 )
         self.int_links = int_links
 
-
-
         # temp_latency = "1ps"
 
         # self.routers = [Router(router_id=i, latency=temp_latency) for i in range(len(controllers))]
 
         # self.ext_links = [
 
-        #     # SimpleExtLink(link_id=i, ext_node=c, int_node=self.routers[i]) 
+        #     # SimpleExtLink(link_id=i, ext_node=c, int_node=self.routers[i])
         #     # for i, c in enumerate(controllers)
         # ]
-
-
 
         # for i, c in enumerate(controllers):
         #     self.ext_links.append(
         #             ExtLink(
-        #                 link_id=i, 
+        #                 link_id=i,
         #                 ext_node=node,
         #                 int_node=routers[num_routers - 1],
         #                 latency=link_latency,
         #             )
         #     )
-        
-        
+
         # link_count = 0
         # int_links = []
 
@@ -375,6 +375,3 @@ class MyNetwork(SimpleNetwork):
         #         if (currId%width != width - 1):
         #             link_count += 1
         #             int_links.append(link_id=link_count, src_node=)
-
-
-

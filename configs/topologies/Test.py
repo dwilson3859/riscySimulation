@@ -1,29 +1,4 @@
-# Copyright (c) 2010 Advanced Micro Devices, Inc.
-#               2016 Georgia Institute of Technology
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met: redistributions of source code must retain the above copyright
-# notice, this list of conditions and the following disclaimer;
-# redistributions in binary form must reproduce the above copyright
-# notice, this list of conditions and the following disclaimer in the
-# documentation and/or other materials provided with the distribution;
-# neither the name of the copyright holders nor the names of its
-# contributors may be used to endorse or promote products derived from
-# this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# hehehe donaldo rocks
 
 from m5.params import *
 from m5.objects import *
@@ -32,11 +7,6 @@ from math import isqrt
 from common import FileSystemConfig
 
 from topologies.BaseTopology import SimpleTopology
-
-# Creates a generic Mesh assuming an equal number of cache
-# and directory controllers.
-# XY routing is enforced (using link weights)
-# to guarantee deadlock freedom.
 
 
 class Test(SimpleTopology):
@@ -58,14 +28,18 @@ class Test(SimpleTopology):
         sockets = 1
         print("num of routers: " + str(num_routers))
 
-
         link_latency = options.link_latency  # used by simple and garnet
         router_latency = options.router_latency  # only used by garnet
-        cpe_routers = [Router (router_id=i, latency=router_latency) for i in range(rtrs_per_mesh * num_coregroups)]
-        mpe_routers = [Router (router_id=i+len(cpe_routers), latency=router_latency) for i in range(num_coregroups)]
+        cpe_routers = [
+            Router(router_id=i, latency=router_latency)
+            for i in range(rtrs_per_mesh * num_coregroups)
+        ]
+        mpe_routers = [
+            Router(router_id=i + len(cpe_routers), latency=router_latency)
+            for i in range(num_coregroups)
+        ]
 
         network.routers = cpe_routers + mpe_routers
-
 
         # Count for every single link to make each link unique
         link_count = 0
@@ -77,66 +51,63 @@ class Test(SimpleTopology):
         ext_links = []
 
         # lists of specific controllers
-        cpu_nodes = [n for n in nodes if n.type == "L1Cache_Controller" ]
+        cpu_nodes = [n for n in nodes if n.type == "L1Cache_Controller"]
         print("initial size: " + str(len(cpu_nodes)))
-        l2_nodes  = [n for n in nodes if n.type == "L2Cache_Controller"] 
+        l2_nodes = [n for n in nodes if n.type == "L2Cache_Controller"]
         print("l2 nodes: " + str(len(l2_nodes)))
         dir_nodes = [n for n in nodes if n.type == "Directory_Controller"]
         print("dir nodes: " + str(len(dir_nodes)))
-            
+
         for rtr in cpe_routers:
-            for cpuId in range(cpu_per_router ):
+            for cpuId in range(cpu_per_router):
                 ext_links.append(
-                ExtLink(
+                    ExtLink(
                         link_id=link_count,
                         ext_node=cpu_nodes.pop(),
                         int_node=rtr,
-                        latency=link_latency,            
+                        latency=link_latency,
                     )
-                )      
+                )
             link_count += 1
-            
+
         for rtr in mpe_routers:
             ext_links.append(
                 ExtLink(
-                        link_id=link_count,
-                        ext_node=cpu_nodes.pop(),
-                        int_node=rtr,
-                        latency=link_latency*2,            
+                    link_id=link_count,
+                    ext_node=cpu_nodes.pop(),
+                    int_node=rtr,
+                    latency=link_latency * 2,
                 )
             )
             link_count += 1
             ext_links.append(
                 ExtLink(
-                        link_id=link_count,
-                        ext_node=dir_nodes.pop(),
-                        int_node=rtr,
-                        latency=link_latency,            
-                    )
+                    link_id=link_count,
+                    ext_node=dir_nodes.pop(),
+                    int_node=rtr,
+                    latency=link_latency,
                 )
+            )
             link_count += 1
             for n in l2_nodes:
                 ext_links.append(
-                ExtLink(
+                    ExtLink(
                         link_id=link_count,
                         ext_node=l2_nodes.pop(),
                         int_node=rtr,
-                        latency=link_latency,            
+                        latency=link_latency,
                     )
                 )
                 link_count += 1
 
-
-
         network.ext_links = ext_links
 
-#_________________________link inbetween routers :)  _______________________________________________________
-
+        # _________________________link inbetween routers :)  _______________________________________________________
 
         # make mesh topology for routers connected to cpe's
 
         # East output to West input links (weight = 1)
-        num_rows = isqrt(num_routers//num_coregroups)
+        num_rows = isqrt(num_routers // num_coregroups)
         print("rows that are supposed to be there : " + str(num_rows))
         num_columns = num_rows
         for cgid in range(num_coregroups):
@@ -148,8 +119,12 @@ class Test(SimpleTopology):
                         int_links.append(
                             IntLink(
                                 link_id=link_count,
-                                src_node=cpe_routers[east_out + (cgid * num_rows * num_columns)],
-                                dst_node=cpe_routers[west_in + (cgid * num_rows * num_columns)],
+                                src_node=cpe_routers[
+                                    east_out + (cgid * num_rows * num_columns)
+                                ],
+                                dst_node=cpe_routers[
+                                    west_in + (cgid * num_rows * num_columns)
+                                ],
                                 src_outport="East",
                                 dst_inport="West",
                                 latency=link_latency,
@@ -167,8 +142,12 @@ class Test(SimpleTopology):
                         int_links.append(
                             IntLink(
                                 link_id=link_count,
-                                src_node=cpe_routers[west_out + (cgid * num_rows * num_columns)],
-                                dst_node=cpe_routers[east_in + (cgid * num_rows * num_columns)],
+                                src_node=cpe_routers[
+                                    west_out + (cgid * num_rows * num_columns)
+                                ],
+                                dst_node=cpe_routers[
+                                    east_in + (cgid * num_rows * num_columns)
+                                ],
                                 src_outport="West",
                                 dst_inport="East",
                                 latency=link_latency,
@@ -186,8 +165,12 @@ class Test(SimpleTopology):
                         int_links.append(
                             IntLink(
                                 link_id=link_count,
-                                src_node=cpe_routers[north_out + (cgid * num_rows * num_columns)],
-                                dst_node=cpe_routers[south_in + (cgid * num_rows * num_columns)],
+                                src_node=cpe_routers[
+                                    north_out + (cgid * num_rows * num_columns)
+                                ],
+                                dst_node=cpe_routers[
+                                    south_in + (cgid * num_rows * num_columns)
+                                ],
                                 src_outport="North",
                                 dst_inport="South",
                                 latency=link_latency,
@@ -205,8 +188,12 @@ class Test(SimpleTopology):
                         int_links.append(
                             IntLink(
                                 link_id=link_count,
-                                src_node=cpe_routers[south_out + (cgid * num_rows * num_columns)],
-                                dst_node=cpe_routers[north_in + (cgid * num_rows * num_columns)],
+                                src_node=cpe_routers[
+                                    south_out + (cgid * num_rows * num_columns)
+                                ],
+                                dst_node=cpe_routers[
+                                    north_in + (cgid * num_rows * num_columns)
+                                ],
                                 src_outport="South",
                                 dst_inport="North",
                                 latency=link_latency,
@@ -215,38 +202,34 @@ class Test(SimpleTopology):
                         )
                         link_count += 1
 
-
-
-        #inter connect mpe routers to their corresponding mesh
+        # inter connect mpe routers to their corresponding mesh
         for cgid, rtr in enumerate(mpe_routers):
             int_links.append(
                 IntLink(
-                        link_id=link_count,
-                        src_node=rtr,
-                        dst_node=cpe_routers[cgid * num_rows * num_columns],
-                        src_outport="North",
-                        dst_inport="South",
-                        latency=link_latency,
-                        weight=1,
-                )   
+                    link_id=link_count,
+                    src_node=rtr,
+                    dst_node=cpe_routers[cgid * num_rows * num_columns],
+                    src_outport="North",
+                    dst_inport="South",
+                    latency=link_latency,
+                    weight=1,
+                )
             )
             link_count += 1
 
             int_links.append(
                 IntLink(
-                        link_id=link_count,
-                        src_node=cpe_routers[cgid * num_rows * num_columns],
-                        dst_node=rtr,
-                        src_outport="South",
-                        dst_inport="North",
-                        latency=link_latency,
-                        weight=1,
-                )   
+                    link_id=link_count,
+                    src_node=cpe_routers[cgid * num_rows * num_columns],
+                    dst_node=rtr,
+                    src_outport="South",
+                    dst_inport="North",
+                    latency=link_latency,
+                    weight=1,
+                )
             )
             link_count += 1
 
-
-        
         for mpeCount, rtr in enumerate(mpe_routers):
 
             # make ring under here :)
@@ -255,25 +238,25 @@ class Test(SimpleTopology):
             elif num_coregroups == 2:
                 int_links.append(
                     IntLink(
-                            link_id=link_count,
-                            src_node=mpe_routers[0],
-                            dst_node=rtr,
-                            src_outport="leftRing",
-                            dst_inport="rightRing",
-                            latency=link_latency,
-                            weight=1,
+                        link_id=link_count,
+                        src_node=mpe_routers[0],
+                        dst_node=rtr,
+                        src_outport="leftRing",
+                        dst_inport="rightRing",
+                        latency=link_latency,
+                        weight=1,
                     )
                 )
                 link_count += 1
                 int_links.append(
                     IntLink(
-                            link_id=link_count,
-                            src_node=rtr,
-                            dst_node=mpe_routers[0],
-                            src_outport="rightRing",
-                            dst_inport="leftRing",
-                            latency=link_latency,
-                            weight=1,
+                        link_id=link_count,
+                        src_node=rtr,
+                        dst_node=mpe_routers[0],
+                        src_outport="rightRing",
+                        dst_inport="leftRing",
+                        latency=link_latency,
+                        weight=1,
                     )
                 )
                 link_count += 1
@@ -281,60 +264,55 @@ class Test(SimpleTopology):
             elif mpeCount == len(mpe_routers) - 1:
                 int_links.append(
                     IntLink(
-                            link_id=link_count,
-                            src_node=mpe_routers[0],
-                            dst_node=rtr,
-                            src_outport="leftRing",
-                            dst_inport="rightRing",
-                            latency=link_latency,
-                            weight=1,
+                        link_id=link_count,
+                        src_node=mpe_routers[0],
+                        dst_node=rtr,
+                        src_outport="leftRing",
+                        dst_inport="rightRing",
+                        latency=link_latency,
+                        weight=1,
                     )
                 )
                 link_count += 1
                 int_links.append(
                     IntLink(
-                            link_id=link_count,
-                            src_node=rtr,
-                            dst_node=mpe_routers[0],
-                            src_outport="rightRing",
-                            dst_inport="leftRing",
-                            latency=link_latency,
-                            weight=1,
+                        link_id=link_count,
+                        src_node=rtr,
+                        dst_node=mpe_routers[0],
+                        src_outport="rightRing",
+                        dst_inport="leftRing",
+                        latency=link_latency,
+                        weight=1,
                     )
                 )
                 link_count += 1
             else:
                 int_links.append(
                     IntLink(
-                            link_id=link_count,
-                            src_node=rtr,
-                            dst_node=mpe_routers[mpeCount + 1],
-                            src_outport="leftRing",
-                            dst_inport="rightRing",
-                            latency=link_latency,
-                            weight=1,
+                        link_id=link_count,
+                        src_node=rtr,
+                        dst_node=mpe_routers[mpeCount + 1],
+                        src_outport="leftRing",
+                        dst_inport="rightRing",
+                        latency=link_latency,
+                        weight=1,
                     )
                 )
                 link_count += 1
                 int_links.append(
                     IntLink(
-                            link_id=link_count,
-                            src_node=mpe_routers[mpeCount + 1],
-                            dst_node=rtr,
-                            src_outport="rightRing",
-                            dst_inport="leftRing",
-                            latency=link_latency,
-                            weight=1,
+                        link_id=link_count,
+                        src_node=mpe_routers[mpeCount + 1],
+                        dst_node=rtr,
+                        src_outport="rightRing",
+                        dst_inport="leftRing",
+                        latency=link_latency,
+                        weight=1,
                     )
                 )
                 link_count += 1
 
-
-
-
         network.int_links = int_links
-
-
 
     # Register nodes with filesystem
     def registerTopology(self, options):

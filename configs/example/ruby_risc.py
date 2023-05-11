@@ -72,7 +72,6 @@ for cpu in system.cpu:
     cpu.createInterruptController()
 
 
-
 Ruby.create_system(args, False, system, cpus=cpu_list)
 
 # Since Ruby runs at an independent frequency, create a seperate clock
